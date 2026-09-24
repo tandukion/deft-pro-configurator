@@ -1,0 +1,15 @@
+[Unit]
+Description=DEFT Pro button remapper
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/deft-pro-daemon
+Restart=on-failure
+RestartSec=2
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/deft-pro
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DEFT Pro Configurator
+Comment=Configure Elecom DEFT Pro buttons
+Exec=/usr/bin/deft-pro-configurator
+Icon=deft-pro-configurator
+Terminal=false
+Categories=Settings;Utility;GTK;
+StartupNotify=true

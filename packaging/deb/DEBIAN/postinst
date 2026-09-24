@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+modprobe uinput >/dev/null 2>&1 || true
+udevadm control --reload-rules >/dev/null 2>&1 || true
+udevadm trigger --subsystem-match=input >/dev/null 2>&1 || true
+udevadm trigger --subsystem-match=misc --property-match=DEVNAME=/dev/uinput >/dev/null 2>&1 || true
+systemctl --global enable deft-pro-daemon.service >/dev/null 2>&1 || true
+exit 0

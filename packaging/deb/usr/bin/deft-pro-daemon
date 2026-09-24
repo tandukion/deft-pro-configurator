@@ -1,0 +1,7 @@
+#!/usr/bin/python3
+import sys
+sys.path.insert(0, "/opt/deft-pro")
+from deft_pro.engine import run_daemon
+
+if __name__ == "__main__":
+    run_daemon()

@@ -1,0 +1,11 @@
+Package: deft-pro-configurator
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Dwindra Sulistyoutomo <tandukion@hotmail.com>
+Depends: python3 (>= 3.8), python3-gi, gir1.2-gtk-3.0, python3-evdev, udev
+Description: GUI configurator and remapper for the Elecom DEFT Pro trackball
+ A GTK desktop application for configuring the Elecom DEFT Pro on Ubuntu/Linux.
+ Supports mouse buttons, keyboard keys/hotkeys, shell commands, profiles,
+ background remapping through evdev/uinput, and automatic startup.

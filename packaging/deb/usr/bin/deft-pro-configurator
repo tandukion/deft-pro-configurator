@@ -1,0 +1,7 @@
+#!/usr/bin/python3
+import sys
+sys.path.insert(0, "/opt/deft-pro")
+from deft_pro.gui import run_gui
+
+if __name__ == "__main__":
+    raise SystemExit(run_gui())
