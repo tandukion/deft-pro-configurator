@@ -37,3 +37,25 @@ def test_deft_pro_udev_rule_handles_existing_devices():
     assert not any(line.strip() and not line.lstrip().startswith('#') and 'ACTION=="add"' in line for line in text.splitlines())
     assert 'ATTRS{name}=="*DEFT Pro*"' in text
     assert 'TAG+="uaccess"' in text
+
+
+def test_keyboard_key_set_includes_shortcut_keys():
+    from pathlib import Path
+
+    source = Path(__file__).parents[1] / "src" / "deft_pro" / "engine.py"
+    text = source.read_text()
+    assert "keyboard_keys" in text
+    assert "KEY_LEFTCTRL" in text
+    assert "KEY_LEFTALT" in text
+    assert "KEY_LEFTMETA" in text
+    assert "x >= e.BTN_LEFT" not in text
+
+
+def test_project_metadata_version_matches_release():
+    from pathlib import Path
+    import re
+
+    root = Path(__file__).parents[1]
+    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+    metadata = (root / "pyproject.toml").read_text(encoding="utf-8")
+    assert re.search(r'^version = "' + re.escape(version) + r'"$', metadata, re.MULTILINE)

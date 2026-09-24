@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3
+- Fix keyboard shortcut output from the virtual uinput device.
+- Keep Fn-button and mouse remapping behavior unchanged.
+
+
 All notable changes to DEFT Pro Configurator are documented here.
 
 ## [1.0.2] - 2026-09-24

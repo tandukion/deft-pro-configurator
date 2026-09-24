@@ -97,7 +97,7 @@ The Debian package declares these runtime dependencies, so `apt` normally instal
 From a downloaded release:
 
 ```bash
-sudo apt install ./deft-pro-configurator_1.0.2_all.deb
+sudo apt install ./deft-pro-configurator_1.0.3_all.deb
 ```
 
 Using `apt` instead of `dpkg -i` is recommended because `apt` can resolve the package dependencies.
@@ -124,13 +124,13 @@ Then build:
 The resulting package is written to:
 
 ```text
-dist/deft-pro-configurator_1.0.2_all.deb
+dist/deft-pro-configurator_1.0.3_all.deb
 ```
 
 Install it with:
 
 ```bash
-sudo apt install ./dist/deft-pro-configurator_1.0.2_all.deb
+sudo apt install ./dist/deft-pro-configurator_1.0.3_all.deb
 ```
 
 ### First-run permissions

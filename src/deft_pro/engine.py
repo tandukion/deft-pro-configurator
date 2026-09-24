@@ -19,7 +19,7 @@ except ImportError as exc:  # pragma: no cover - dependency handled by .deb
 else:
     IMPORT_ERROR = None
 
-from .config import CONFIG_FILE, SOCKET_FILE, STATE_FILE, load_config
+from .config import CONFIG_FILE, SOCKET_FILE, STATE_FILE, KEY_NAMES, load_config
 
 
 class Remapper:
@@ -113,8 +113,24 @@ class Remapper:
 
     def create_uinput(self, dev):
         caps = dev.capabilities(absinfo=True)
+
+        # The virtual device must expose both pointer buttons and keyboard keys.
+        # The previous implementation filtered EV_KEY codes with x >= BTN_LEFT,
+        # which correctly retained mouse buttons but accidentally removed all
+        # KEY_* codes (Ctrl/Alt/Super/arrows/etc.). Mouse mappings therefore worked
+        # while keyboard shortcuts were silently ignored by the kernel.
+        source_keys = set(caps.get(e.EV_KEY, []))
+        keyboard_keys = set()
+        for name in KEY_NAMES:
+            code = self.key_code(name)
+            if code is not None:
+                keyboard_keys.add(code)
+        keyboard_keys.update({
+            e.KEY_LEFTCTRL, e.KEY_LEFTALT, e.KEY_LEFTSHIFT, e.KEY_LEFTMETA,
+            e.KEY_RIGHTCTRL, e.KEY_RIGHTALT, e.KEY_RIGHTSHIFT, e.KEY_RIGHTMETA,
+        })
         events = {
-            e.EV_KEY: [x for x in caps.get(e.EV_KEY, []) if x >= e.BTN_LEFT],
+            e.EV_KEY: sorted(source_keys | keyboard_keys),
             e.EV_REL: caps.get(e.EV_REL, []),
         }
         # Ensure all standard buttons, plus wheel/side buttons, exist on the virtual pointer.
