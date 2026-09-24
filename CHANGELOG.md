@@ -1,8 +1,11 @@
 # Changelog
 
-## 1.0.3
+## 1.0.3 - 2026-09-24
+
+- Replace application icon with the supplied DEFT Pro product artwork; version remains 1.0.3.
 - Fix keyboard shortcut output from the virtual uinput device.
 - Keep Fn-button and mouse remapping behavior unchanged.
+- Correct the application icon to depict the DEFT Pro's index-finger trackball layout, based on the official product reference.
 
 
 All notable changes to DEFT Pro Configurator are documented here.

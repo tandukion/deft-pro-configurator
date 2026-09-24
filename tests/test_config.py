@@ -59,3 +59,13 @@ def test_project_metadata_version_matches_release():
     version = (root / "VERSION").read_text(encoding="utf-8").strip()
     metadata = (root / "pyproject.toml").read_text(encoding="utf-8")
     assert re.search(r'^version = "' + re.escape(version) + r'"$', metadata, re.MULTILINE)
+
+def test_deft_pro_icon_is_packaged():
+    root = Path(__file__).resolve().parents[1]
+    icon = root / "assets" / "deft-pro-configurator.png"
+    assert icon.exists()
+    assert icon.stat().st_size > 10000
+    for size in (16, 32, 48, 64, 128, 256, 512):
+        packaged = root / "packaging" / "deb" / "usr" / "share" / "icons" / "hicolor" / f"{size}x{size}" / "apps" / "deft-pro-configurator.png"
+        assert packaged.exists()
+
