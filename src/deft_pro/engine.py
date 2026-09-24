@@ -40,6 +40,7 @@ class Remapper:
         self.active_outputs = {}
         self.active_profile = self.config.get("active_profile", "Default")
         self.release_all = False
+        self.last_detection_error = None
 
     def update_status(self, **kwargs):
         with self.status_lock:
@@ -52,30 +53,61 @@ class Remapper:
             pass
 
     def find_device(self):
+        """Find the physical DEFT Pro event device.
+
+        Bluetooth and USB versions can expose slightly different evdev
+        capabilities and names. In particular, the Bluetooth device is commonly
+        exposed as ``DEFT Pro TrackBall`` / ``ELECOM TrackBall Mouse DEFT Pro
+        TrackBall``. Do not require a particular USB VID/PID or the complete
+        button set here; those checks made Bluetooth devices appear disconnected
+        when access permissions were otherwise correct.
+        """
         hint = self.config.get("device_hint", "DEFT Pro TrackBall").lower()
         candidates = []
+        permission_denied = []
         for path in evdev.list_devices():
             try:
                 dev = InputDevice(path)
                 name = (dev.name or "").lower()
                 caps = dev.capabilities()
                 buttons = set(caps.get(e.EV_KEY, []))
-                if e.BTN_LEFT not in buttons and e.BTN_RIGHT not in buttons:
+                rels = set(caps.get(e.EV_REL, []))
+
+                is_named_deft = "deft pro" in name or "deftpro" in name
+                has_pointer = e.BTN_LEFT in buttons or e.BTN_RIGHT in buttons
+                has_motion = e.REL_X in rels and e.REL_Y in rels
+                if not is_named_deft and not (has_pointer and has_motion):
                     dev.close()
                     continue
+
                 score = 0
-                if "deft pro" in name:
+                if is_named_deft:
                     score += 100
                 if "trackball" in name:
                     score += 30
                 if hint and hint in name:
                     score += 20
+                if has_pointer:
+                    score += 15
+                if has_motion:
+                    score += 10
                 score += min(20, len(buttons))
                 candidates.append((score, dev))
+            except PermissionError as exc:
+                permission_denied.append((path, str(exc)))
             except OSError:
                 continue
+
+        self.last_detection_error = None
         if not candidates:
+            if permission_denied:
+                paths = ", ".join(path for path, _ in permission_denied[:3])
+                self.last_detection_error = (
+                    "DEFT Pro input device(s) found but access was denied "
+                    f"({paths}). Reload the udev rules or log out/in."
+                )
             return None
+
         candidates.sort(key=lambda x: x[0], reverse=True)
         return candidates[0][1]
 
@@ -410,7 +442,8 @@ class Remapper:
             self.reload_config()
             dev = self.find_device()
             if dev is None:
-                self.update_status(running=False, device=None, message="DEFT Pro not detected — connect it")
+                message = self.last_detection_error or "DEFT Pro not detected — connect it"
+                self.update_status(running=False, device=None, message=message)
                 time.sleep(2)
                 continue
             try:

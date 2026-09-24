@@ -135,7 +135,7 @@ sudo apt install ./dist/deft-pro-configurator_1.0.0_all.deb
 
 ### First-run permissions
 
-The package installs a udev rule for the DEFT Pro and `/dev/uinput`. On most Ubuntu desktop sessions the `uaccess` rule takes effect without additional group configuration.
+The package installs udev rules for both USB and Bluetooth DEFT Pro event devices, plus `/dev/uinput`. The rules use `uaccess` so the active desktop user can access the device without adding themselves to the `input` group.
 
 If the application reports a permission error immediately after installation, log out and back in, then check the daemon status as described in the troubleshooting section below.
 
@@ -287,7 +287,18 @@ rm -rf .build dist
 
 ### The GUI says the DEFT Pro is not detected
 
-Check whether Linux sees an input device:
+Bluetooth and USB expose the DEFT Pro slightly differently. The application now supports both paths, and the package includes a Bluetooth-specific udev rule matching the DEFT Pro device name. Linux users have documented the Bluetooth device under the product name `DEFT Pro TrackBall`; see, for example, https://gist.github.com/kerikun11/e623b388a984f8848006d159ec9291a3 and https://gist.github.com/lo48576/90ed577e3a0d528c08faf5dc7ce05ded.
+
+After upgrading to a release containing this fix, run:
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=input
+modprobe uinput
+systemctl --user restart deft-pro-daemon.service
+```
+
+Then check whether Linux sees an input device:
 
 ```bash
 ls -l /dev/input/by-id/

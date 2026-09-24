@@ -1,5 +1,10 @@
 # Elecom DEFT Pro: grant the active desktop user access to the input device.
-# Known DEFT Pro USB product IDs include 0131 and 0132.
-ACTION=="add", SUBSYSTEM=="input", ATTRS{idVendor}=="056e", ATTRS{idProduct}=="0131|0132", TAG+="uaccess"
+# USB mode: known DEFT Pro vendor/product IDs.
+ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="056e", ATTRS{idProduct}=="0131|0132", TAG+="uaccess"
+
+# Bluetooth mode: DEFT Pro does not necessarily expose the same USB VID/PID.
+# Match the device name used by Linux/udev instead.
+ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="*DEFT Pro*", TAG+="uaccess"
+
 # Allow the active desktop user to create/manage a uinput virtual pointer.
 KERNEL=="uinput", MODE="0660", TAG+="uaccess"
