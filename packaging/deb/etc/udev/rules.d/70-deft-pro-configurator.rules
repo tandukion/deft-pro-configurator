@@ -1,10 +1,18 @@
-# Elecom DEFT Pro: grant the active desktop user access to the input device.
+# DEFT Pro input permissions.
+#
+# uaccess grants the active desktop session access to the DEFT Pro input node.
+# Do not restrict these rules to ACTION=="add": package installation and
+# udevadm trigger commonly replay "change" events for already-connected devices.
+
 # USB mode: known DEFT Pro vendor/product IDs.
-ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="056e", ATTRS{idProduct}=="0131|0132", TAG+="uaccess"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="056e", ATTRS{idProduct}=="0131|0132", TAG+="uaccess"
 
-# Bluetooth mode: DEFT Pro does not necessarily expose the same USB VID/PID.
-# Match the device name used by Linux/udev instead.
-ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="*DEFT Pro*", TAG+="uaccess"
+# Bluetooth mode: Linux commonly exposes the device as "DEFT Pro TrackBall".
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_MOUSE}=="1", ATTRS{name}=="*DEFT Pro*", TAG+="uaccess"
 
-# Allow the active desktop user to create/manage a uinput virtual pointer.
+# Keep the node in the standard input group as a non-ACL fallback and for
+# diagnostics. The normal path is the active-session uaccess ACL above.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="*DEFT Pro*", MODE="0660", GROUP="input"
+
+# Allow the active desktop user to create/manage the uinput virtual pointer.
 KERNEL=="uinput", MODE="0660", TAG+="uaccess"

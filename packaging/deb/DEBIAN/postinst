@@ -2,7 +2,18 @@
 set -e
 modprobe uinput >/dev/null 2>&1 || true
 udevadm control --reload-rules >/dev/null 2>&1 || true
+# Replay input rules for devices that are already connected. The package rules
+# intentionally do not require ACTION=="add", so this also applies to an
+# already-connected Bluetooth DEFT Pro.
 udevadm trigger --subsystem-match=input >/dev/null 2>&1 || true
 udevadm trigger --subsystem-match=misc --property-match=DEVNAME=/dev/uinput >/dev/null 2>&1 || true
+systemctl --global daemon-reload >/dev/null 2>&1 || true
 systemctl --global enable deft-pro-daemon.service >/dev/null 2>&1 || true
+
+# If installed from a normal interactive apt/sudo session, refresh the current
+# user's user service so the updated unit is used immediately. This is best
+# effort and intentionally harmless in non-interactive/package-builder contexts.
+if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+    su - "$SUDO_USER" -c 'systemctl --user daemon-reload >/dev/null 2>&1 || true; systemctl --user restart deft-pro-daemon.service >/dev/null 2>&1 || true' || true
+fi
 exit 0

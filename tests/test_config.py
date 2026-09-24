@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
+
 import json
 
 import deft_pro.config as config
@@ -23,3 +27,13 @@ def test_load_config_repairs_missing_fields(tmp_path, monkeypatch):
     assert loaded["active_profile"] == "My Profile"
     assert bindings["10"] == {"type": "disabled"}
     assert bindings["1"] == {"type": "passthrough"}
+
+
+def test_deft_pro_udev_rule_handles_existing_devices():
+    from pathlib import Path
+
+    rule = Path(__file__).parents[1] / "packaging" / "deb" / "etc" / "udev" / "rules.d" / "70-deft-pro-configurator.rules"
+    text = rule.read_text(encoding="utf-8")
+    assert not any(line.strip() and not line.lstrip().startswith('#') and 'ACTION=="add"' in line for line in text.splitlines())
+    assert 'ATTRS{name}=="*DEFT Pro*"' in text
+    assert 'TAG+="uaccess"' in text

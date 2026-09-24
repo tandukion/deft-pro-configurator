@@ -97,7 +97,7 @@ The Debian package declares these runtime dependencies, so `apt` normally instal
 From a downloaded release:
 
 ```bash
-sudo apt install ./deft-pro-configurator_1.0.0_all.deb
+sudo apt install ./deft-pro-configurator_1.0.2_all.deb
 ```
 
 Using `apt` instead of `dpkg -i` is recommended because `apt` can resolve the package dependencies.
@@ -124,20 +124,20 @@ Then build:
 The resulting package is written to:
 
 ```text
-dist/deft-pro-configurator_1.0.0_all.deb
+dist/deft-pro-configurator_1.0.2_all.deb
 ```
 
 Install it with:
 
 ```bash
-sudo apt install ./dist/deft-pro-configurator_1.0.0_all.deb
+sudo apt install ./dist/deft-pro-configurator_1.0.2_all.deb
 ```
 
 ### First-run permissions
 
-The package installs udev rules for both USB and Bluetooth DEFT Pro event devices, plus `/dev/uinput`. The rules use `uaccess` so the active desktop user can access the device without adding themselves to the `input` group.
+The package installs udev rules for both USB and Bluetooth DEFT Pro event devices, plus `/dev/uinput`. The rules use `uaccess` so the active desktop user can access the device without adding themselves to the `input` group. The DEFT Pro rule intentionally does not require `ACTION=="add"`; this is important because package installation may trigger `change` events for an already-connected Bluetooth device.
 
-If the application reports a permission error immediately after installation, log out and back in, then check the daemon status as described in the troubleshooting section below.
+After installation or upgrade, the package reloads the udev rules and triggers the input subsystem so an already-connected DEFT Pro can receive the updated permissions. The package also reloads/restarts the current user's daemon on normal `sudo apt install` upgrades when possible.
 
 ## Usage
 
@@ -315,6 +315,10 @@ And the recent logs:
 ```bash
 journalctl --user -u deft-pro-daemon.service --no-pager -n 100
 ```
+
+### Version 1.0.2 permission fix
+
+Version 1.0.2 fixes a Bluetooth permission edge case from 1.0.1. The previous rule required an `add` event, while `udevadm trigger` commonly replays `change` events for an already-connected device. The new rule matches the DEFT Pro input node without restricting the action type, so the active-session `uaccess` ACL can be applied during installation as well as on reconnect.
 
 ### The daemon reports a permission error
 
